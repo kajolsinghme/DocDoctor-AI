@@ -1,5 +1,6 @@
 import fitz
 from app.services.chunk_service import chunk_text
+from app.services.vector_store_service import store_chunks_in_chroma
 
 async def upload_pdf_service(pdf_file):
     file_content = await pdf_file.read()
@@ -10,7 +11,8 @@ async def upload_pdf_service(pdf_file):
 
     extracted_text = extract_text_from_pdf(file_path)
 
-    chunk_text(extracted_text)
+    chunks = chunk_text(extracted_text)
+    store_chunks_in_chroma(chunks)
     return 0
 
 def extract_text_from_pdf(file_path):
