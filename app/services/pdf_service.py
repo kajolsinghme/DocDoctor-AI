@@ -1,4 +1,5 @@
 import fitz
+from app.services.chunk_service import chunk_text
 
 async def upload_pdf_service(pdf_file):
     file_content = await pdf_file.read()
@@ -9,7 +10,8 @@ async def upload_pdf_service(pdf_file):
 
     extracted_text = extract_text_from_pdf(file_path)
 
-    return extracted_text
+    chunk_text(extracted_text)
+    return 0
 
 def extract_text_from_pdf(file_path):
     pages = []
