@@ -18,4 +18,3 @@ def chunk_text(pages):
             }
         )
     return chunk_list
-    

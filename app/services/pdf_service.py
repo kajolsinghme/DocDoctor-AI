@@ -12,7 +12,7 @@ async def upload_pdf_service(pdf_file):
     extracted_text = extract_text_from_pdf(file_path)
 
     chunks = chunk_text(extracted_text)
-    store_chunks_in_chroma(chunks)
+    store_chunks_in_chroma(chunks, pdf_file.filename)
     return 0
 
 def extract_text_from_pdf(file_path):
