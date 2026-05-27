@@ -6,10 +6,10 @@ router = APIRouter()
 @router.post("/upload-pdf")
 async def upload_pdf(pdf_file: UploadFile = File(...)):
     try:
-        result = await upload_pdf_service(pdf_file)
+        await upload_pdf_service(pdf_file)
         return {
             "success": True,
-            "result": result
+            "result": "PDF uploaded successfully"
         }
     except Exception as err:
         return {
