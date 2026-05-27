@@ -9,7 +9,6 @@ router = APIRouter()
 def ask_questions(query : QuestionRequest):
     try:
         results =  retrieve_relevant_chunks(query.query)
-        print(results)
         context_parts = []
 
         for result in results:
@@ -35,8 +34,6 @@ def ask_questions(query : QuestionRequest):
             If you don't find the answer in the given context the please say: 
             I'm sorry, I do not have enough knowledge.
         """
-
-        print("prompt", prompt)
 
         response = generate_ai_response(prompt)
 
