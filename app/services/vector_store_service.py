@@ -7,18 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def store_chunks_in_chroma(chunks, filename):
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/embedding-002",
-        google_api_key=os.getenv("GEMINI_API_KEY")
-    )
-
-    vector_store = Chroma(
-        collection_name="pdf_documents",
-        embedding_function=embeddings,
-        persist_directory="chroma_db"
-    )
+    
     documents = create_documents(chunks, filename)
-
+    vector_store = get_vector_store()
     vector_store.add_documents(documents)
 
 def create_documents(chunks, filename):
@@ -33,3 +24,16 @@ def create_documents(chunks, filename):
         )
         documents.append(document)
     return documents
+
+def get_vector_store():
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/embedding-002",
+        google_api_key=os.getenv("GEMINI_API_KEY")
+    )
+
+    vector_store = Chroma(
+        collection_name="pdf_documents",
+        embedding_function=embeddings,
+        persist_directory="chroma_db"
+    )
+    return vector_store
