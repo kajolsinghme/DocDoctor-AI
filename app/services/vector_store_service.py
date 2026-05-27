@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def store_chunks_in_chroma(chunks, filename):
-    
     documents = create_documents(chunks, filename)
     vector_store = get_vector_store()
     vector_store.delete(
