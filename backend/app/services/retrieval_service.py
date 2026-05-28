@@ -1,4 +1,4 @@
-from backend.app.services.vector_store_service import get_vector_store
+from app.services.vector_store_service import get_vector_store
 
 def retrieve_relevant_chunks(query):
     vector_store = get_vector_store()
