@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from app.services.retrieval_service import retrieve_relevant_chunks
-from app.models.schemas import QuestionRequest
-from app.services.llm_service import generate_ai_response
+from backend.app.services.retrieval_service import retrieve_relevant_chunks
+from backend.app.models.schemas import QuestionRequest
+from backend.app.services.llm_service import generate_ai_response
 
 router = APIRouter()
 

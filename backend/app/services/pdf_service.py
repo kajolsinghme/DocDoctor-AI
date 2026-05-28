@@ -1,6 +1,6 @@
 import fitz
-from app.services.chunk_service import chunk_text
-from app.services.vector_store_service import store_chunks_in_chroma
+from backend.app.services.chunk_service import chunk_text
+from backend.app.services.vector_store_service import store_chunks_in_chroma
 
 async def upload_pdf_service(pdf_file):
     file_content = await pdf_file.read()

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File
-from app.services.pdf_service import upload_pdf_service
+from backend.app.services.pdf_service import upload_pdf_service
 
 router = APIRouter()
 
