@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Upload } from "lucide-react";
+import api from "@/services/api";
 
 type Message = {
   role: "ai" | "user";
@@ -15,12 +16,37 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleUpload = (file: File) => {
+  const handleUpload = async (file: File) => {
     if (!file) return;
+    try {
+      setLoading(true);
 
-    setDocument(file);
+      const formData = new FormData();
+      formData.append("pdf_file", file);
 
-    console.log("Uploaded file:", file.name);
+      console.log(formData)
+      const response = await api.post("/upload-pdf", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log(response.data);
+
+      setDocument(file);
+
+      setMessages([
+        {
+          role: "ai",
+          text: `Great! I've loaded "${file.name}". I'm ready to answer questions about this document.`,
+        },
+      ]);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to upload PDF");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSend = async () => {
@@ -33,19 +59,35 @@ export default function Home() {
 
     setMessages((prev) => [...prev, userMessage]);
 
+    const currentQuestion = input;
+
     setInput("");
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const response = await api.post("/ask-questions", {
+        query: currentQuestion,
+      });
+
       const aiMessage: Message = {
         role: "ai",
-        text: `This is a sample AI response for "${userMessage.text}"`,
+        text: response.data.result,
       };
 
       setMessages((prev) => [...prev, aiMessage]);
+    } catch (err) {
+      console.error(err);
 
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: "Error getting AI response.",
+        },
+      ]);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (

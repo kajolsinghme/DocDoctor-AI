@@ -23,17 +23,35 @@ def ask_questions(query : QuestionRequest):
         context = "\n\n".join(context_parts)
 
         prompt = f"""
-            You are a helpful assistant. Please answer the question ONLY from the provided context.
+            You are a helpful assistant.
+            Answer based on the provided context.
+            Answer using plain text only.
+            You may make reasonable inferences when strongly supported by the context.
 
-            Context: 
+            For example:
+            - If tools such as Lucidchart or Draw.io are mentioned, it is reasonable to infer experience creating diagrams and flows.
+            - If a programming language is listed as familiar, it is reasonable to infer basic working knowledge.
+
+            Clearly distinguish facts from inferences.
+
+            If the answer cannot be determined or reasonably inferred from the context, say:
+            "I'm sorry, I do not have enough information."
+            Do not use:
+            - Markdown
+            - Bullet points
+            - Asterisks (*)
+            - Headings
+            - Numbered lists
+
+            Provide a concise natural-language answer.
+
+            Context:
             {context}
 
-            Question: 
-            ${query.query}
-
-            If you don't find the answer in the given context the please say: 
-            I'm sorry, I do not have enough knowledge.
+            Question:
+            {query.query}
         """
+
 
         response = generate_ai_response(prompt)
 
