@@ -57,10 +57,7 @@ def ask_questions(query : QuestionRequest):
             "I'm sorry, I do not have enough information."
             Do not use:
             - Markdown
-            - Bullet points
             - Asterisks (*)
-            - Headings
-            - Numbered lists
 
             Provide a concise natural-language answer.
 
