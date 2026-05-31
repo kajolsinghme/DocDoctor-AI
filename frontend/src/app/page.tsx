@@ -4,27 +4,40 @@ import { useState } from "react";
 import Image from "next/image";
 import { Upload } from "lucide-react";
 import api from "@/services/api";
+import { toast } from "sonner";
+
+type Source = {
+  source: string;
+  page: number;
+};
 
 type Message = {
-  role: "ai" | "user";
+  role: "user" | "ai";
   text: string;
+  sources?: Source[];
 };
 
 export default function Home() {
   const [document, setDocument] = useState<File | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
 
   const handleUpload = async (file: File) => {
-    if (!file) return;
+    if (!file) {
+      toast.warning("Please select a file first");
+      return;
+    }
+
+    const toastId = toast.loading("Uploading document...");
+
     try {
-      setLoading(true);
+      setUploading(true);
 
       const formData = new FormData();
       formData.append("pdf_file", file);
 
-      console.log(formData)
       const response = await api.post("/upload-pdf", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -32,6 +45,10 @@ export default function Home() {
       });
 
       console.log(response.data);
+
+      toast.success("Document uploaded successfully!", {
+        id: toastId,
+      });
 
       setDocument(file);
 
@@ -43,9 +60,11 @@ export default function Home() {
       ]);
     } catch (error) {
       console.error(error);
-      alert("Failed to upload PDF");
+      toast.error("Upload failed", {
+        id: toastId,
+      });
     } finally {
-      setLoading(false);
+      setUploading(false);
     }
   };
 
@@ -62,9 +81,9 @@ export default function Home() {
     const currentQuestion = input;
 
     setInput("");
-    setLoading(true);
 
     try {
+      setChatLoading(true);
       const response = await api.post("/ask-questions", {
         query: currentQuestion,
       });
@@ -72,10 +91,12 @@ export default function Home() {
       const aiMessage: Message = {
         role: "ai",
         text: response.data.result,
+        sources: response.data.sources,
       };
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (err) {
+      toast.error("Failed to get AI response");
       console.error(err);
 
       setMessages((prev) => [
@@ -86,7 +107,7 @@ export default function Home() {
         },
       ]);
     } finally {
-      setLoading(false);
+      setChatLoading(false);
     }
   };
 
@@ -158,6 +179,7 @@ export default function Home() {
                   type="file"
                   accept="application/pdf"
                   className="hidden"
+                  disabled={uploading}
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) handleUpload(file);
@@ -191,7 +213,6 @@ export default function Home() {
           </div>
         ) : (
           <div className="h-full flex flex-col">
-            {/* HEADER */}
             <div className="border-b border-gray-200 p-4">
               <h2 className="font-semibold text-lg">{document?.name}</h2>
 
@@ -221,12 +242,28 @@ export default function Home() {
                         : "bg-gray-100 text-gray-800"
                     }`}
                   >
-                    {msg.text}
+                    <p>{msg.text}</p>
+
+                    {msg.role === "ai" &&
+                      msg.sources &&
+                      msg.sources.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-gray-300">
+                          <p className="text-xs font-semibold text-gray-500 mb-1">
+                            Sources
+                          </p>
+
+                          {msg.sources.map((source, idx) => (
+                            <div key={idx} className="text-xs text-gray-500">
+                              📄 {source.source} • Page {source.page}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                   </div>
                 </div>
               ))}
 
-              {loading && (
+              {chatLoading && (
                 <div className="text-sm text-gray-500">AI is thinking...</div>
               )}
             </div>
@@ -242,9 +279,10 @@ export default function Home() {
 
               <button
                 onClick={handleSend}
+                disabled= {chatLoading}
                 className="bg-violet-500 hover:bg-violet-600 cursor-pointer text-white px-6 rounded-xl transition"
               >
-                Send
+                {chatLoading ? "Thinking..." : "Send"}
               </button>
             </div>
           </div>

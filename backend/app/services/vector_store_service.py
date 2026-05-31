@@ -3,15 +3,16 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.documents import Document
 import os
 from dotenv import load_dotenv
+import shutil
 
 load_dotenv()
 
 def store_chunks_in_chroma(chunks, filename):
+    if os.path.exists("chroma_db"):
+        shutil.rmtree("chroma_db")
+
     documents = create_documents(chunks, filename)
     vector_store = get_vector_store()
-    vector_store.delete(
-    where={"source": filename}
-)
     vector_store.add_documents(documents)
 
 def create_documents(chunks, filename):

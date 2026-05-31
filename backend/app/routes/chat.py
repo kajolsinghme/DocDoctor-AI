@@ -9,12 +9,21 @@ router = APIRouter()
 def ask_questions(query : QuestionRequest):
     try:
         results =  retrieve_relevant_chunks(query.query)
+        print("RESULTS")
+        for r in results:
+            print(r.metadata)
+        unique_sources = set()
         context_parts = []
 
         for result in results:
+            unique_sources.add((
+               result.metadata["page"],
+                result.metadata["source"]
+            ))
+           
             context_parts.append(
                 f"""
-                Content: {result.page_content}
+                Content: {result.page_content} 
                 Page: {result.metadata["page"]}
                 Source: {result.metadata["source"]}
                 """
@@ -22,8 +31,18 @@ def ask_questions(query : QuestionRequest):
 
         context = "\n\n".join(context_parts)
 
+        sources = [
+            {
+                "source": source,
+                "page": page
+            }
+            for source, page in unique_sources
+        ]
+
         prompt = f"""
-            You are a helpful assistant.
+            You are DocDoctor AI, a helpful assistant that answers questions based on uploaded documents.
+            If the user greets you, asks who you are, or asks what you can do, respond naturally as DocDoctor AI and explain that you help users understand and ask questions about their uploaded documents.
+            Answer based on the provided context.   
             Answer based on the provided context.
             Answer using plain text only.
             You may make reasonable inferences when strongly supported by the context.
@@ -57,7 +76,8 @@ def ask_questions(query : QuestionRequest):
 
         return {
             "success": True,
-            "result": response
+            "result": response,
+            "sources": sources
         }
     except Exception as err:
         return {
