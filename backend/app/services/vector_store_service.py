@@ -8,13 +8,18 @@ import shutil
 load_dotenv()
 
 def store_chunks_in_chroma(chunks, filename):
-    if os.path.exists("chroma_db"):
-        shutil.rmtree("chroma_db")
-
     documents = create_documents(chunks, filename)
+
+    vector_store = get_vector_store()
+
+    try:
+        vector_store.delete_collection()
+    except Exception:
+        pass
+
     vector_store = get_vector_store()
     vector_store.add_documents(documents)
-
+    
 def create_documents(chunks, filename):
     documents = []
     for chunk in chunks:

@@ -45,12 +45,15 @@ export default function Home() {
       });
 
       console.log(response.data);
+      if (!response.data.success) {
+        throw new Error(response.data.error);
+      }
+
+      setDocument(file);
 
       toast.success("Document uploaded successfully!", {
         id: toastId,
       });
-
-      setDocument(file);
 
       setMessages([
         {
@@ -69,7 +72,10 @@ export default function Home() {
   };
 
   const handleSend = async () => {
+    console.log("HANDLE SEND CALLED");
+
     if (!input.trim()) return;
+    console.log(input);
 
     const userMessage: Message = {
       role: "user",
@@ -77,8 +83,10 @@ export default function Home() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    console.log(messages);
 
     const currentQuestion = input;
+    console.log(currentQuestion);
 
     setInput("");
 
@@ -88,27 +96,41 @@ export default function Home() {
         query: currentQuestion,
       });
 
+      console.log("Ask Question Response:", response.data);
+
+      if (!response.data.success) {
+        throw new Error(response.data.error);
+      }
+
       const aiMessage: Message = {
         role: "ai",
         text: response.data.result,
         sources: response.data.sources,
       };
 
+      console.log(aiMessage);
       setMessages((prev) => [...prev, aiMessage]);
-    } catch (err) {
+    } catch (err: unknown) {
       toast.error("Failed to get AI response");
       console.error(err);
 
       setMessages((prev) => [
-        ...prev,
-        {
-          role: "ai",
-          text: "Error getting AI response.",
-        },
-      ]);
+    ...prev,
+    {
+      role: "ai",
+      text:
+        "I've temporarily reached my AI usage limit and can't process more questions right now. Please wait a moment and try again. Your document is still loaded and ready for use."
+    },
+  ]);
     } finally {
       setChatLoading(false);
     }
+  };
+
+  const handleNewDocument = async () => {
+    setDocument(null);
+    setMessages([]);
+    setInput("");
   };
 
   return (
@@ -139,9 +161,20 @@ export default function Home() {
                 </p>
               </div>
             ) : (
-              <div className="border border-violet-200 bg-violet-50 rounded-xl p-3">
-                <h3 className="font-medium text-violet-800">{document.name}</h3>
-                <p className="text-xs text-violet-600 mt-1">Ready to chat</p>
+              <div>
+                <button
+                  onClick={handleNewDocument}
+                  className="w-full bg-violet-500 hover:bg-violet-600 text-white rounded-xl py-3 px-4 font-medium transition cursor-pointer"
+                >
+                  + Upload New Document
+                </button>
+                <hr className="my-2 border-gray-50" />
+                <div className="border border-violet-200 bg-violet-50 rounded-xl p-3">
+                  <h3 className="font-medium text-violet-800">
+                    {document.name}
+                  </h3>
+                  <p className="text-xs text-violet-600 mt-1">Ready to chat</p>
+                </div>
               </div>
             )}
           </div>
@@ -279,7 +312,7 @@ export default function Home() {
 
               <button
                 onClick={handleSend}
-                disabled= {chatLoading}
+                disabled={chatLoading}
                 className="bg-violet-500 hover:bg-violet-600 cursor-pointer text-white px-6 rounded-xl transition"
               >
                 {chatLoading ? "Thinking..." : "Send"}
