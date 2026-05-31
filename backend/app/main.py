@@ -13,6 +13,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def root():
+    return {
+        "success": True,
+        "message": "DocDoctor AI Backend Running"
+    }
+
 app.include_router(upload_router, prefix='/api')
 
 app.include_router(chat_router, prefix='/api')
