@@ -81,8 +81,3 @@ It uses a Retrieval-Augmented Generation (RAG) pipeline to generate accurate, co
 **Kajol Singh**
 
 ---
-
-If you want, I can next:
-
-* make this README **more “viral GitHub style” (with badges + UI screenshots section)**
-* or optimize it for **recruiter GitHub scanning (very important for placements)**
